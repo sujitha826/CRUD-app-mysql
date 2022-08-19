@@ -10,6 +10,7 @@ function App() {
   const [wage, setWage] = useState(0);
 
   const [employeeList, setEmployeeList] = useState([]);
+  const [newWage, setNewWage] = useState(0);
 
   //sends all inputs from front-end to the backend server(http://localhost:3001) with data on the body object over the route specified.
   const addNewEmployee = () => {
@@ -38,6 +39,37 @@ function App() {
     Axios.get("http://localhost:3001/employees").then((response) => {
       console.log(response.data);
       setEmployeeList(response.data);
+    });
+  };
+
+  const updateEmployeeWage = (id) => {
+    Axios.put("http://localhost:3001/update", { wage: newWage, id: id }).then(
+      (response) => {
+        setEmployeeList(
+          employeeList.map((val) => {
+            return val.id === id
+              ? {
+                id: val.id,
+                name: val.name,
+                country: val.country,
+                age: val.age,
+                position: val.position,
+                wage: newWage,
+              }
+              : val;
+          })
+        );
+      }
+    );
+  };
+
+  const deleteEmployee = (id) => {
+    Axios.delete(`http://localhost:3001/delete/${id}`).then((response) => {
+      setEmployeeList(
+        employeeList.filter((val) => {
+          return val.id !== id;
+        })
+      );
     });
   };
 
@@ -83,18 +115,46 @@ function App() {
         <button onClick={addNewEmployee}>Add Employee</button>
       </div>
       =========================================================================================================================================================
-      <div className="employees-display"><button onClick={showEmployees}>Show Employees</button></div>
-      {employeeList.map((val, key) => {
-        return (
-          <div>
-            <h3>Name: {val.name}</h3>
-            <h3>Age: {val.age}</h3>
-            <h3>Country: {val.country}</h3>
-            <h3>Position: {val.position}</h3>
-            <h3>Wage: {val.wage}</h3>
-          </div>
-        );
-      })}
+      <div className="employees-display"><button onClick={showEmployees}>Show Employees</button>
+        {employeeList.map((val, key) => {
+          return (
+            <div className="employee">
+              <div>
+                <h4>Name: {val.name}</h4>
+                <h4>Age: {val.age}</h4>
+                <h4>Country: {val.country}</h4>
+                <h4>Position: {val.position}</h4>
+                <h4>Annual Wage: {val.wage}</h4>
+              </div>
+              <div>
+                <label>New Wage:</label>
+                <input
+                  type="text"
+                  placeholder="2000..."
+                  onChange={(event) => {
+                    setNewWage(event.target.value);
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    updateEmployeeWage(val.id);
+                  }}
+                >
+                  Update Wage
+                </button>
+
+                <button
+                  onClick={() => {
+                    deleteEmployee(val.id);
+                  }}
+                >
+                  Delete Employee
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
